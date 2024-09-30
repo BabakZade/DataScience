@@ -10,8 +10,9 @@ from univariate import Model
 
 
 mtcars = pd.read_csv("LinearRegression/mtcars.csv")
-model = Model(mtcars['wt'], mtcars['mpg'], -5.34, 37.29)
+model = Model(mtcars['wt'], mtcars['mpg'], True)
 model.trainModel()
+model.plotCountorForTraining()
 
 
 
