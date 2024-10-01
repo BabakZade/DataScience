@@ -5,17 +5,19 @@ import matplotlib
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 matplotlib.style.use('ggplot')
-from univariate import Model
+from linearRegression import UniVarModel
+from linearRegression import MultiVarModel
 
 
 
 mtcars = pd.read_csv("LinearRegression/mtcars.csv")
-model = Model(mtcars['wt'], mtcars['mpg'], True)
-model.trainModel()
-model.plotCountorForTraining()
+
+#model = UniVarModel(mtcars['wt'], mtcars['mpg'], True)
+#model.trainModel()
 
 
-
+modelMulti = MultiVarModel(mtcars[['wt','qsec']], mtcars['mpg'], True)
+modelMulti.trainModel()
 
 
 from sklearn import linear_model
@@ -33,3 +35,7 @@ print(regression_model.intercept_)
 # Check trained model coefficients
 print(regression_model.coef_)
 
+
+print(model.calculateMSE(model.weight, model.bias))
+
+print(model.calculateMSE(regression_model.coef_[0], regression_model.intercept_))

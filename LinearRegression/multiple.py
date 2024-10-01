@@ -7,7 +7,4 @@ import sys
 from matplotlib import cm
 from mpl_toolkits.mplot3d import axes3d
 
-from regression import Regression
-
-
 
