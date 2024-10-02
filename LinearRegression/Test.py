@@ -12,12 +12,13 @@ from linearRegression import MultiVarModel
 
 mtcars = pd.read_csv("LinearRegression/mtcars.csv")
 
-#model = UniVarModel(mtcars['wt'], mtcars['mpg'], True)
-#model.trainModel()
+model = UniVarModel(mtcars['wt'], mtcars['mpg'], True)
+model.trainModel()
 
 
 modelMulti = MultiVarModel(mtcars[['wt','qsec']], mtcars['mpg'], True)
 modelMulti.trainModel()
+print(modelMulti.weight)
 
 
 from sklearn import linear_model
@@ -26,7 +27,7 @@ from sklearn import linear_model
 regression_model = linear_model.LinearRegression()
 
 # Train the model using the mtcars data
-regression_model.fit(X = pd.DataFrame(mtcars["wt"]), 
+regression_model.fit(X = pd.DataFrame(mtcars[['wt','qsec']]), 
                      y = mtcars["mpg"])
 
 # Check trained model y-intercept
@@ -36,6 +37,6 @@ print(regression_model.intercept_)
 print(regression_model.coef_)
 
 
-print(model.calculateMSE(model.weight, model.bias))
+print(modelMulti.calculateMSE(modelMulti.weight, modelMulti.bias))
 
-print(model.calculateMSE(regression_model.coef_[0], regression_model.intercept_))
+print(modelMulti.calculateMSE(regression_model.coef_ , regression_model.intercept_))
