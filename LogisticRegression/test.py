@@ -34,7 +34,7 @@ from logisticRegression import LogisticRegression
 
 
 
-model = LogisticRegression(x_train, y_train, classifierTreshhold = 0.5, costfunctionName = 'sigmoid', scalerName = 'stdZ', optimizerName= 'adam', ifDetail = 'true')
+model = LogisticRegression(x_train, y_train, classifierTreshhold = 0.5, costfunctionName = 'sigmoid', scalerName = 'stdZ', optimizerName= 'adam' , lambdaRegularization= 100, ifDetail = 'true')
 model.trainModel()
 model.test(x_test, y_test)
 

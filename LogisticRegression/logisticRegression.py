@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import matplotlib
 import matplotlib.pyplot as plt
 from activation import *
 from scaler import *
@@ -11,7 +10,7 @@ class LogisticRegression:
     Logistic Regression Classifier.
 
     This class implements logistic regression for binary classification tasks. It includes options for different
-    activation functions, scaling techniques, and optimization algorithms.
+    activation functions, scaling techniques, regularization, and optimization algorithms.
 
     Parameters:
     -----------
@@ -27,19 +26,21 @@ class LogisticRegression:
         Name of the scaler to use ('minmax', 'stdZ').
     optimizerName : str, optional (default='gd')
         Name of the optimizer to use ('gd', 'adam').
+    lambdaRegularization : float, optional (default=0)
+        Regularization term for controlling overfitting.
     ifDetail : str, optional (default='true')
         Whether to log the training details.
 
     Methods:
     --------
     settings() -> None:
-        Set default training parameters such as convergence gap and learning rate details.
+        Set default training parameters such as convergence gap, learning rate, and iteration details.
 
     test(x_test: np.ndarray, y_test: np.ndarray) -> tuple[np.ndarray, np.ndarray, pd.DataFrame, dict]:
-        Test the trained model on the test set and return performance metrics like precision, recall, F1 score, etc.
+        Test the trained model on the test set and return performance metrics such as precision, recall, F1 score, and accuracy.
 
     predict(x_test: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-        Predict output for new input data based on the learned weights and bias.
+        Predict the output for new input data based on the learned weights and bias.
 
     trainModel() -> None:
         Train the logistic regression model using the specified optimizer.
@@ -48,12 +49,13 @@ class LogisticRegression:
         Perform the optimization to minimize the cost function by updating weights and bias using the chosen algorithm.
 
     calculateCost(weight: np.ndarray, bias: float) -> float:
-        Calculate the cost using the chosen cost function.
+        Calculate the cost using the chosen cost function with optional regularization.
     """
     
-    def __init__(self, x_train: np.ndarray, y_train: np.ndarray, classifierTreshhold: float = 0.5, costfunctionName: str = 'sigmoid', scalerName: str = 'minmax', optimizerName: str = 'gd', ifDetail: str = 'true'):
+    def __init__(self, x_train: np.ndarray, y_train: np.ndarray, classifierTreshhold: float = 0.5, costfunctionName: str = 'sigmoid', scalerName: str = 'minmax', optimizerName: str = 'gd', lambdaRegularization: float = 0, ifDetail: str = 'true'):
         self.x_train = x_train
         self.y_train = y_train
+        self.lambdaRegularization = lambdaRegularization
         self.classifierTreshhold = classifierTreshhold
 
         # Cost function and scaler initialization
@@ -210,7 +212,7 @@ class LogisticRegression:
                 cost_history.append(newCost)  # Append current cost to history for visualization
 
             iteration += 1
-            djdw, djdb = self.cost.djdw_db(self.x_train, self.y_train, self.weight, self.bias)
+            djdw, djdb = self.cost.djdw_db(self.x_train, self.y_train, self.weight, self.bias, self.lambdaRegularization)
             tmpW, tmpB = self.optimzerEngin.iteration(self.weight, self.bias, djdw, djdb)
 
             oldCost = newCost  # Store previous cost
@@ -253,7 +255,7 @@ class LogisticRegression:
         float
             The calculated cost.
         """
-        return self.cost.calculateCost(self.x_train, self.y_train, weight, bias)
+        return self.cost.calculateCost(self.x_train, self.y_train, weight, bias, self.lambdaRegularization)
 
 
 class CostFunction:

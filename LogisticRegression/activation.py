@@ -20,11 +20,11 @@ class Activation:
     computeGZ(x_train: np.ndarray, w: np.ndarray, b: float) -> np.ndarray:
         Computes the dot product of the weights and inputs, adds bias, and applies the activation function.
     
-    djdw_db(x_train: np.ndarray, y_train: np.ndarray, w: np.ndarray, b: float) -> tuple[np.ndarray, float]:
-        Computes the gradient of the cost function with respect to the weights and bias.
+    djdw_db(x_train: np.ndarray, y_train: np.ndarray, w: np.ndarray, b: float, lambdaReg: float) -> tuple[np.ndarray, float]:
+        Computes the gradient of the cost function with respect to the weights and bias, including regularization.
     
-    calculateCost(x_train: np.ndarray, y_train: np.ndarray, w: np.ndarray, b: float) -> float:
-        Computes the cost function (to be implemented by subclasses).
+    calculateCost(x_train: np.ndarray, y_train: np.ndarray, w: np.ndarray, b: float, lambdaReg: float) -> float:
+        Computes the cost function with regularization (to be implemented by subclasses).
     """
     
     def __init__(self):
@@ -72,9 +72,11 @@ class Activation:
         gz = np.vectorize(self.gFunction)(z).T
         return gz
 
-    def djdw_db(self, x_train: np.ndarray, y_train: np.ndarray, w: np.ndarray, b: float) -> tuple[np.ndarray, float]:
+    def djdw_db(self, x_train: np.ndarray, y_train: np.ndarray, w: np.ndarray, b: float, lambdaReg: float) -> tuple[np.ndarray, float]:
         """
         Computes the gradient of the cost function with respect to the weights (djdw) and bias (djdb).
+
+        Includes regularization for the weights to reduce overfitting.
 
         Parameters:
         -----------
@@ -86,6 +88,8 @@ class Activation:
             The weights of the model.
         b : float
             The bias term of the model.
+        lambdaReg : float
+            The regularization parameter (L2 regularization).
 
         Returns:
         --------
@@ -95,11 +99,11 @@ class Activation:
         """
         m, n = x_train.shape
         y_had = self.computeGZ(x_train, w, b)
-        djdw = 1 / m * np.dot((y_had - y_train), x_train)
+        djdw = 1 / m * (np.dot((y_had - y_train), x_train) + lambdaReg * w)  # Regularization term added to djdw
         djdb = np.mean(y_had - y_train)
         return djdw, djdb
 
-    def calculateCost(self, x_train: np.ndarray, y_train: np.ndarray, w: np.ndarray, b: float) -> float:
+    def calculateCost(self, x_train: np.ndarray, y_train: np.ndarray, w: np.ndarray, b: float, lambdaReg: float) -> float:
         """
         Placeholder for the cost function, to be implemented in derived classes.
 
@@ -113,13 +117,16 @@ class Activation:
             The weights of the model.
         b : float
             The bias term of the model.
+        lambdaReg : float
+            The regularization parameter (L2 regularization).
 
         Returns:
         --------
         float
-            The computed cost (to be implemented in subclasses).
+            The computed cost with regularization (to be implemented in subclasses).
         """
         pass
+
 
 
 class Sigmoid(Activation):
@@ -138,8 +145,8 @@ class Sigmoid(Activation):
     gFunction(z: np.ndarray) -> np.ndarray:
         Applies the Sigmoid activation function to the input z.
     
-    calculateCost(x_train: np.ndarray, y_train: np.ndarray, w: np.ndarray, b: float) -> float:
-        Computes the cost function using cross-entropy loss for logistic regression.
+    calculateCost(x_train: np.ndarray, y_train: np.ndarray, w: np.ndarray, b: float, lambdaReg: float) -> float:
+        Computes the cost function using cross-entropy loss for logistic regression with L2 regularization.
     """
 
     def __init__(self):
@@ -174,9 +181,9 @@ class Sigmoid(Activation):
         z = np.clip(z, -self.zClipper, self.zClipper)  # Clip z to avoid overflow
         return 1 / (1 + np.exp(-z))
 
-    def calculateCost(self, x_train: np.ndarray, y_train: np.ndarray, w: np.ndarray, b: float) -> float:
+    def calculateCost(self, x_train: np.ndarray, y_train: np.ndarray, w: np.ndarray, b: float, lambdaReg: float) -> float:
         """
-        Computes the cross-entropy cost for logistic regression with the Sigmoid activation function.
+        Computes the cross-entropy cost for logistic regression with the Sigmoid activation function and L2 regularization.
         
         Parameters:
         -----------
@@ -188,15 +195,19 @@ class Sigmoid(Activation):
             The weights of the model.
         b : float
             The bias term of the model.
+        lambdaReg : float
+            The regularization parameter (L2 regularization).
 
         Returns:
         --------
         float
-            The computed cross-entropy cost.
+            The computed cross-entropy cost with L2 regularization.
         """
         y_hat = self.computeGZ(x_train, w, b)
         y_hat = np.clip(y_hat, self.eps, 1 - self.eps)  # Clip predictions to avoid log(0)
-        return -np.mean(y_train * np.log(y_hat) + (1 - y_train) * np.log(1 - y_hat))
+        cross_entropy_loss = -np.mean(y_train * np.log(y_hat) + (1 - y_train) * np.log(1 - y_hat))
+        reg_term = lambdaReg / 2 * np.mean(w ** 2)  # L2 regularization term
+        return cross_entropy_loss + reg_term
 
 
 class ReLU(Activation):
@@ -221,7 +232,7 @@ class ReLU(Activation):
         Applies the ReLU activation function: max(0, z).
         
         Parameters:
-        -----------
+        ----------- 
         z : np.ndarray
             The linear combination of weights and inputs.
         
