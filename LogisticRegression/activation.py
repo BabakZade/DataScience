@@ -203,14 +203,48 @@ class Sigmoid(Activation):
         float
             The computed cross-entropy cost with L2 regularization.
         """
+        m,n = x_train.shape
         y_hat = self.computeGZ(x_train, w, b)
         y_hat = np.clip(y_hat, self.eps, 1 - self.eps)  # Clip predictions to avoid log(0)
         cross_entropy_loss = -np.mean(y_train * np.log(y_hat) + (1 - y_train) * np.log(1 - y_hat))
-        reg_term = lambdaReg / 2 * np.mean(w ** 2)  # L2 regularization term
+        reg_term = lambdaReg / 2 / m * np.sum(w ** 2)  # L2 regularization term
         return cross_entropy_loss + reg_term
 
 
 class ReLU(Activation):
+    """
+    Implements the ReLU (Rectified Linear Unit) activation function.
+
+    Methods:
+    --------
+    gFunction(z: np.ndarray) -> np.ndarray:
+        Applies the ReLU activation function to the input z.
+    """
+
+    def __init__(self):
+        """
+        Initializes the ReLU activation function with its mathematical expression.
+        """
+        self.name = "ReLU"
+        self.math = "max(0, z)"
+
+    def gFunction(self, z: np.ndarray) -> np.ndarray:
+        """
+        Applies the ReLU activation function: max(0, z).
+        
+        Parameters:
+        ----------- 
+        z : np.ndarray
+            The linear combination of weights and inputs.
+        
+        Returns:
+        --------
+        np.ndarray
+            The ReLU-transformed output.
+        """
+        return np.maximum(0, z)
+
+class SoftMax(Activation):
     """
     Implements the ReLU (Rectified Linear Unit) activation function.
 

@@ -52,7 +52,7 @@ class LogisticRegression:
         Calculate the cost using the chosen cost function with optional regularization.
     """
     
-    def __init__(self, x_train: np.ndarray, y_train: np.ndarray, classifierTreshhold: float = 0.5, costfunctionName: str = 'sigmoid', scalerName: str = 'minmax', optimizerName: str = 'gd', lambdaRegularization: float = 0, ifDetail: str = 'true'):
+    def __init__(self, x_train: np.ndarray, y_train: np.ndarray, classifierTreshhold: float = 0.5, costfunctionName: str = 'Sigmoid', scalerName: str = 'MinMax', optimizerName: str = 'GradientDescent', lambdaRegularization: float = 0, ifDetail: str = 'true'):
         self.x_train = x_train
         self.y_train = y_train
         self.lambdaRegularization = lambdaRegularization
@@ -70,7 +70,7 @@ class LogisticRegression:
         self.optimzerEngin = OptimizerEngine(optimizerName, self.n).optimizer
 
         self.weight = np.random.randn(self.n) * 0.01  # Initialize weights randomly
-        self.bias = 0  # Initialize bias to zero
+        self.bias = np.random.randn() * 0.01  # Initialize bias to zero
         
         self.ifDetail = ifDetail  # Detail flag for logging
         self.settings()  # Set default training parameters
@@ -269,8 +269,9 @@ class CostFunction:
     """
     def __init__(self, costName: str):
         self.costFunction = {
-            "sigmoid": Sigmoid,
-            'reLU': ReLU
+            "Sigmoid": Sigmoid,
+            'ReLU': ReLU,
+            'Softmax':SoftMax
         }
         self.cost = self.costFunction[costName]()
 
@@ -286,8 +287,8 @@ class ScaleFunction:
     """
     def __init__(self, scaleName: str):
         self.scaleFunction = {
-            "minmax": MinMax,
-            'stdZ': StndZ
+            "MinMax": MinMax,
+            'StdZ': StndZ
         }
         self.scaler = self.scaleFunction[scaleName]()
 
@@ -305,7 +306,7 @@ class OptimizerEngine:
     """
     def __init__(self, optimizerName: str, nFeature: int):
         self.optimizerEngine = {
-            "gd": GradientDescent,
-            'adam': Adam
+            "GradientDescent": GradientDescent,
+            'Adam': Adam
         }
         self.optimizer = self.optimizerEngine[optimizerName](nFeature)
