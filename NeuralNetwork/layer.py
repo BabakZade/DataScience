@@ -1,77 +1,79 @@
 
 import numpy as np
 from neuron import Neuron
-from LogisticRegression.logisticRegression import *
+from activation import *
 
 
 
 
 class Layer:
 
-    def __init__(self, x_train, y_train, numberOfNode, activationName = 'Sigmoid', randomActivation = 'False', randomScaler = 'False', randomOptimizer = 'False', lambdaRegularization = 1 , batchSize = 1):
+    def __init__(self, units = 1, activationName = 'Sigmoid', randomActivation = True):
 
-        
-        self.layer = np.empty(numberOfNode, Neuron)
-        self.x_train = x_train
-        self.y_train = y_train
-        self.m, self.n = x_train.shape
+        self.units = units
+        self.layer = np.empty(units, Neuron)
         self.activationName = activationName
-        self.lambdaRegularization = lambdaRegularization
-
-        self.settings(randomActivation, randomScaler, randomOptimizer, batchSize)
-
-        pass
-
-    def settings(self, randomActivation, randomScaler, randomOptimizer, batchSize):
         self.randomActivation = randomActivation
-        self.batchSize = batchSize
-        self.randomScaler = randomScaler
-        self.randomOptimizer = randomOptimizer
-        pass
+        self.m = 0 
+        self.n = 0
+        for i in range(units):            
+            if randomActivation:
+                print(Activation.__subclasses__())
+                dictClass = Activation.__subclasses__()
+                activationCl = np.random.choice(dictClass)
+                activationName = activationCl.__name__
+            self.layer[i] = Neuron(activationName)
+    
+    def initialize(self, a_in):    
+        if self.m != a_in.shape[0]:
+            self.m = a_in.shape[0]
+            self.a_out = np.zeros(shape=(self.m, self.units), dtype= float)
+            self.z_out = np.zeros(shape=(self.m, self.units), dtype= float)
+            self.z_prime = np.zeros(shape=(self.m, self.units), dtype= float)
 
-    def runNeuran(self):
-        for i in len(self.layer):
-            # Determine the number of rows to select 
-            sizeXY = int(self.batchSize * self.m)
-
-            # Generate random indices to select
-            indices = np.random.choice(self.m, sizeXY, replace=False)
-
-            # Use the same indices to select rows from both x and y
-            x_selected = self.x_train[indices]
-            y_selected = self.y_train[indices]
-            activationName = self.activationName
-            scalerName = 'MinMax'
-            optimizerName = 'GradientDescent'
-            if self.randomActivation:
-                dictClass = Activation._derived
-                activationName = np.random.choice(list(dictClass.values()))
-            if self.randomOptimizer:
-                dictClass = Optimizer._derived
-                optimizerName = np.random.choice(list(dictClass.values()))
-            if self.randomScaler:
-                dictClass = Scale._derived
-                scalerName = np.random.choice(list(dictClass.values()))
+        if self.n != a_in.shape[1]:      
+            self.n = a_in.shape[1]  
+            self.weights = np.zeros(shape=(self.units, self.n), dtype= float)
+            self.bias = np.zeros(shape=(self.units), dtype= float)
+            self.dw = np.zeros(shape=(self.units, self.n), dtype= float)
+            self.db = np.zeros(shape=(self.units), dtype= float)
+    
 
 
 
-            self.layer[i] = Neuron(x_train=x_selected, y_train= y_selected, classifierTreshhold=0.5, costfunctionName= activationName,scalerName=scalerName, optimizerName=optimizerName, lambdaRegularization=self.lambdaRegularization, ifDetail = False)
+    def dense(self, a_in):
+        self.a_in = a_in
+        for i in range(self.units):
+            self.z_out[:,i], self.a_out[:, i] = self.layer[i].activate(self.a_in, self.weights[i,:], self.bias[i])
+
 
 
     def getWeights(self):
         return self.weights, self.bias
     
 
-    def setWeights(self, weights, bias):
-        self.weights = weights 
-        self.bias = bias
+    def setWeights(self, weights = None, bias = None):
+        if weights != None:
+            self.weights = weights 
+            self.bias = bias
+        else:
+            for i in range(len(self.layer)):
+                self.weights[i,:] = self.layer[i].activation.weightinitial(self.n)
+                self.bias[i] = self.layer[i].activation.weightinitial(1)
+
+    
+    def set_backward(self, da):
+        
+        for n in range(self.units):
+            self.dw[n,:], self.db[n] = self.layer[n].gradian(da[:,n])
+            
+        
+        
 
 
+    
+        
+
+            
 
 
-
-
-    def setInitialWeight(self):
-        pass
-
-    pass

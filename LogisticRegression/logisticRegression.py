@@ -69,8 +69,8 @@ class LogisticRegression:
         self.m, self.n = x_train.shape
         self.optimzerEngin = OptimizerEngine(optimizerName, self.n).optimizer
 
-        self.weight = np.random.randn(self.n) * 0.01  # Initialize weights randomly
-        self.bias = np.random.randn() * 0.01  # Initialize bias to zero
+        self.weight = self.cost.weightinitial(self.n)  # Initialize weights randomly
+        self.bias = self.cost.weightinitial(1)   # Initialize bias to zero
         
         self.ifDetail = ifDetail  # Detail flag for logging
         self.settings()  # Set default training parameters
@@ -258,39 +258,7 @@ class LogisticRegression:
         return self.cost.calculateCost(self.x_train, self.y_train, weight, bias, self.lambdaRegularization)
 
 
-class CostFunction:
-    """
-    Handles different cost functions (sigmoid, ReLU) for logistic regression.
 
-    Parameters:
-    -----------
-    costName : str
-        The name of the cost function to use.
-    """
-    def __init__(self, costName: str):
-        self.costFunction = {
-            "Sigmoid": Sigmoid,
-            'ReLU': ReLU,
-            'Softmax':SoftMax
-        }
-        self.cost = self.costFunction[costName]()
-
-
-class ScaleFunction:
-    """
-    Handles different scaling functions (MinMax, Standard Z-Score).
-
-    Parameters:
-    -----------
-    scaleName : str
-        The name of the scaling function to use.
-    """
-    def __init__(self, scaleName: str):
-        self.scaleFunction = {
-            "MinMax": MinMax,
-            'StdZ': StndZ
-        }
-        self.scaler = self.scaleFunction[scaleName]()
 
 
 class OptimizerEngine:

@@ -1,4 +1,24 @@
 import numpy as np
+import math
+
+class CostFunction:
+    """
+    Handles different cost functions (sigmoid, ReLU) for logistic regression.
+
+    Parameters:
+    -----------
+    costName : str
+        The name of the cost function to use.
+    """
+    def __init__(self, costName: str):
+        self.costFunction = {
+            "Sigmoid": Sigmoid,
+            'ReLU': ReLU,
+            'Softmax':SoftMax
+        }
+        self.cost = self.costFunction[costName]()
+
+
 
 class Activation:
     """
@@ -71,6 +91,22 @@ class Activation:
         z = np.dot(x_train, w) + b
         gz = np.vectorize(self.gFunction)(z).T
         return gz
+    
+    # Xavier Initialization (Glorot)
+    def xavier_init(numberOfUnits):
+        fan_in = numberOfUnits[0]  # Number of input units
+        stddev = math.sqrt(1 / fan_in)
+        return np.random.normal(0, stddev, size=numberOfUnits)
+
+    # He Initialization
+    def he_init(numberOfUnits):
+        fan_in = numberOfUnits[0]  # Number of input units
+        stddev = math.sqrt(2 / fan_in)
+        return np.random.normal(0, stddev, size=numberOfUnits)
+    
+   
+    
+
 
     def djdw_db(self, x_train: np.ndarray, y_train: np.ndarray, w: np.ndarray, b: float, lambdaReg: float) -> tuple[np.ndarray, float]:
         """
@@ -209,6 +245,16 @@ class Sigmoid(Activation):
         cross_entropy_loss = -np.mean(y_train * np.log(y_hat) + (1 - y_train) * np.log(1 - y_hat))
         reg_term = lambdaReg / 2 / m * np.sum(w ** 2)  # L2 regularization term
         return cross_entropy_loss + reg_term
+    
+    def weightinitial(self, numberOfUnits):        
+        return self.xavier_init(numberOfUnits)
+    
+    def activation_prime(self, z):
+        return self.gFunction(z) * (1 - self.gFunction(z))
+
+    
+    
+    
 
 
 class ReLU(Activation):
@@ -243,6 +289,14 @@ class ReLU(Activation):
             The ReLU-transformed output.
         """
         return np.maximum(0, z)
+    
+    def weightinitial(self, numberOfUnits):        
+        return self.he_init(numberOfUnits)
+    
+    def activation_prime(self, z):
+        prZ = np.where(z > 0, 1, 0)
+        
+        return prZ
 
 class SoftMax(Activation):
     """
@@ -276,3 +330,6 @@ class SoftMax(Activation):
             The ReLU-transformed output.
         """
         return np.maximum(0, z)
+    
+    def weightinitial(self, numberOfUnits):        
+        return self.he_init(numberOfUnits)

@@ -1,5 +1,22 @@
 import numpy as np
 
+class ScaleFunction:
+    """
+    Handles different scaling functions (MinMax, Standard Z-Score).
+
+    Parameters:
+    -----------
+    scaleName : str
+        The name of the scaling function to use.
+    """
+    def __init__(self, scaleName: str):
+        self.scaleFunction = {
+            "MinMax": MinMax,
+            'StdZ': StndZ
+        }
+        self.scaler = self.scaleFunction[scaleName]()
+
+
 class Scale:
     """
     Base class for scaling features. Provides a framework for scaling the training data and new input data.
