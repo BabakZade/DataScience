@@ -28,8 +28,11 @@ class Layer:
         if self.m != a_in.shape[0]:
             self.m = a_in.shape[0]
             self.a_out = np.zeros(shape=(self.m, self.units), dtype= float)
+            self.da_l = np.zeros(shape=(self.m, self.units), dtype= float)
             self.z_out = np.zeros(shape=(self.m, self.units), dtype= float)
             self.z_prime = np.zeros(shape=(self.m, self.units), dtype= float)
+            self.dz = np.zeros(shape=(self.m, self.units), dtype= float)
+         
 
         if self.n != a_in.shape[1]:      
             self.n = a_in.shape[1]  
@@ -53,7 +56,7 @@ class Layer:
     
 
     def setWeights(self, weights = None, bias = None):
-        if weights != None:
+        if weights is not None:
             self.weights = weights 
             self.bias = bias
         else:
@@ -65,7 +68,7 @@ class Layer:
     def set_backward(self, da):
         
         for n in range(self.units):
-            self.dw[n,:], self.db[n] = self.layer[n].gradian(da[:,n])
+            self.dw[n,:], self.db[n], self.dz[:,n] = self.layer[n].gradian(da[:,n])
             
         
         

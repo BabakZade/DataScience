@@ -38,7 +38,7 @@ class Neuron:
         # Step 3: Compute db[l] = (1/m) * sum(dZ[l])
         # Sum over the batch axis, axis=1
         self.db = np.mean(self.dz)
-        return self.dw, self.db
+        return self.dw, self.db, self.dz
 
 
 

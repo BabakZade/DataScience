@@ -83,6 +83,9 @@ class Sigmoid(Activation):
 
     def activation_prime(self, z):
         return self.gFunction(z) * (1 - self.gFunction(z))
+    
+
+
 
 
 class ReLU(Activation):
@@ -104,6 +107,8 @@ class ReLU(Activation):
 
     def activation_prime(self, z):
         return np.where(z > 0, 1, 0)
+
+
 
 
 class SoftMax(Activation):
@@ -128,6 +133,8 @@ class SoftMax(Activation):
         s = self.gFunction(z).reshape(-1, 1)
         jacobian = np.diagflat(s) - np.dot(s, s.T)
         return jacobian
+    
+
 
 
 class Tanh(Activation):
@@ -171,3 +178,6 @@ class Tanh(Activation):
             The derivative of the Tanh activation function.
         """
         return 1 - np.tanh(z) ** 2
+    
+
+

@@ -8,12 +8,16 @@ from layer import *
 class Sequence:
     def __init__(self, x_train, y_train, sequence):
         self.sequence = sequence
-        output_layer = Layer(units=y_train.shape[1], activationName = self.sequence[-1].activationName, randomActivation=self.sequence[-1].randomActivation)
+        output_layer = Layer(units=y_train.shape[1], activationName = 'SoftMax', randomActivation= False) # last layer is always softmax
         self.sequence.append(output_layer)
         self.m, self.n = x_train.shape
         self.x_train = x_train
         self.y_train = y_train
         self.batch_size = 0
+        self.settings()
+
+    def settings(self):
+        self.alpha = 0.000001
         
             
     
@@ -53,18 +57,18 @@ class Sequence:
         # activation is m * c
         # yOutput is m * c
         # in last layer
-        da_l = self.sequence[-1].a_out - yOutput
+        self.sequence[-1].da_l = self.sequence[-1].a_out - yOutput
         m = yOutput.shape[0]  # Number of training examples
 
         for l in reversed(range(len(self.sequence))):
             # Step 1: Compute dZ[l] = dA[l] * activation_prime(Z[l])
             # Step 2: Compute dW[l] = (1/m) * dZ[l] * A[l-1]^T
             # Step 3: Compute db[l] = (1/m) * sum(dZ[l])
-            self.sequence[l].set_backward(da_l)
+            self.sequence[l].set_backward(self.sequence[l].da_l)
 
             # Step 4: Compute dA[l-1] = W[l]^T * dZ[l] (for the previous layer, except for the first layer)
             if l != 0:
-                da_l = np.dot(self.sequence[l].weights.T, self.sequence[l].dz)
+                self.sequence[l - 1].da_l = np.dot(self.sequence[l].dz,  self.sequence[l].weights)
 
             # Step 5: Update W[l] and b[l] using gradients
             self.sequence[l].weights -= self.alpha * self.sequence[l].dw
