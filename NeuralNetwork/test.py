@@ -43,9 +43,12 @@ print(f"Train shape : {X_train.shape}, Y Train : {y_train.shape}")
 print(X_train.shape[1:])
 
 
+# hidden layers
+layer_1 = Layer(1000, 'ReLU')
+layer_2 = Layer(800, 'ReLU')
+layer_3 = Layer(400, 'ReLU')
+layer_4 = Layer(100, 'ReLU')
 
-layer_1 = Layer(8, 'Sigmoid')
-layer_2 = Layer(6, 'Sigmoid')
-
-model = Model(X_train, y_train, [layer_1, layer_2])
-model.fit(epoch= 5, batch_size= 32)
+model = Model(X_train, y_train, [layer_1, layer_2, layer_3, layer_4])
+model.fit(epoch= 30, batch_size= 20)
+model.predict(x_test=X_test, y_test= y_test)

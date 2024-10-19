@@ -51,7 +51,7 @@ def get_model():
         keras.layers.Dense(500, activation='relu'),
         keras.layers.Dense(300, activation='relu'),
         keras.layers.Dropout(0.2),
-        keras.layers.Dense(3, activation='softmax')
+        keras.layers.Dense(3, activation='softmax')  # 3 classes for Iris dataset
     ])
     return model
 
@@ -68,16 +68,34 @@ history = model.fit(X_train, y_train, epochs=30, validation_data=(X_test, y_test
 # Evaluating the model
 model.evaluate(X_test, y_test)
 
-# Performance Monitor
-pd.DataFrame(history.history).plot(figsize=(10,6))
-plt.grid(True)
-plt.gca().set_ylim(0, 1)
-plt.show()
+# Predicting on the test set
+y_pred_proba = model.predict(X_test)
 
-# Predicting new data
-new_data, y_actual = X_test[:3], y_test[:3]
-y_proba = model.predict(new_data)
-print(f"Actual data : {y_actual}")
+# Convert the probabilities to class labels
+y_pred = np.argmax(y_pred_proba, axis=1)
+y_true = np.argmax(y_test, axis=1)  # True class labels
 
-for pred in y_proba:
-    print(np.argmax(pred))
+# Calculate precision for each class
+def calculate_precision_per_class(y_true, y_pred, num_classes):
+    precision_per_class = []
+    
+    for class_index in range(num_classes):
+        # Calculate True Positives (TP) and False Positives (FP) for the current class
+        true_positive = np.sum((y_pred == y_true) & (y_pred == class_index))
+        false_positive = np.sum((y_pred == class_index) & (y_true != class_index))
+        
+        # Calculate precision for the current class
+        precision = true_positive / (true_positive + false_positive + 1e-10)  # Avoid division by zero
+        precision_per_class.append(precision)
+        
+        print(f"Precision for class {class_index}: {precision:.4f}")
+    
+    return precision_per_class
+
+# Assuming there are 3 classes (for the Iris dataset)
+num_classes = 3
+precision_per_class = calculate_precision_per_class(y_true, y_pred, num_classes)
+
+# Calculate macro-averaged precision (average precision across all classes)
+macro_precision = np.mean(precision_per_class)
+print(f"Macro-Averaged Precision: {macro_precision:.4f}")
